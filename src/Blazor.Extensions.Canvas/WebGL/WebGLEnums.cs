@@ -134,7 +134,8 @@ namespace Blazor.Extensions.Canvas.WebGL
     public enum BufferType
     {
         ARRAY_BUFFER = 0x8892,
-        ELEMENT_ARRAY_BUFFER = 0x8893
+        ELEMENT_ARRAY_BUFFER = 0x8893,
+        UNIFORM_BUFFER = 0x8A11
     }
 
     public enum BufferParameter
@@ -209,15 +210,24 @@ namespace Blazor.Extensions.Canvas.WebGL
 
     public enum PixelFormat
     {
+        DEPTH_COMPONENT = 0x1902,
+        RED = 0x1903,
         ALPHA = 0x1906,
         RGB = 0x1907,
         RGBA = 0x1908,
         LUMINANCE = 0x1909,
-        LUMINANCE_ALPHA = 0x190A
+        LUMINANCE_ALPHA = 0x190A,
+        RGBA8 = 0x8058,
+        R8 = 0x8229,
+        RGBA16F = 0x881A,
+        DEPTH_COMPONENT32F = 0x8CAC,
+        RGBA16UI = 0x8D76,
+        R8_SNORM = 0x8F94
     }
 
     public enum PixelType
     {
+        BYTE = 0x1400,
         UNSIGNED_BYTE = 0x1401,
         UNSIGNED_SHORT_4_4_4_4 = 0x8033,
         UNSIGNED_SHORT_5_5_5_1 = 0x8034,
@@ -293,7 +303,8 @@ namespace Blazor.Extensions.Canvas.WebGL
         TEXTURE_MAG_FILTER = 0x2800,
         TEXTURE_MIN_FILTER = 0x2801,
         TEXTURE_WRAP_S = 0x2802,
-        TEXTURE_WRAP_T = 0x2803
+        TEXTURE_WRAP_T = 0x2803,
+        TEXTURE_MAX_LEVEL = 0x813D
     }
 
     public enum TextureParameterValue
@@ -307,6 +318,12 @@ namespace Blazor.Extensions.Canvas.WebGL
         REPEAT = 0x2901,
         CLAMP_TO_EDGE = 0x812F,
         MIRRORED_REPEAT = 0x8370
+    }
+
+    public enum BlitFilter
+    {
+        NEAREST = 0x2600,
+        LINEAR = 0x2601
     }
 
     public enum UniformType
@@ -345,7 +362,9 @@ namespace Blazor.Extensions.Canvas.WebGL
 
     public enum FramebufferType
     {
-        FRAMEBUFFER = 0x8D40
+        FRAMEBUFFER = 0x8D40,
+        READ_FRAMEBUFFER = 0x8CA8,
+        DRAW_FRAMEBUFFER = 0x8CA9
     }
 
     public enum RenderbufferParameter

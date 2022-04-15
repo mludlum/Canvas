@@ -10,7 +10,7 @@ export class ContextManager {
   private readonly patterns = new Map<string, any>();
 
   private readonly webGLTypes = [
-    WebGLBuffer, WebGLShader, WebGLProgram, WebGLFramebuffer, WebGLRenderbuffer, WebGLTexture, WebGLUniformLocation
+    WebGLBuffer, WebGLShader, WebGLProgram, WebGLFramebuffer, WebGLRenderbuffer, WebGLTexture, WebGLUniformLocation, WebGLVertexArrayObject
   ];
 
   public constructor(contextName: string) {
@@ -19,6 +19,9 @@ export class ContextManager {
       this.prototypes = CanvasRenderingContext2D.prototype;
     else if (contextName === "webgl" || contextName === "experimental-webgl") {
       this.prototypes = WebGLRenderingContext.prototype;
+      this.webGLContext = true;
+    } else if (contextName === "webgl2" || contextName === "experimental-webgl2") {
+      this.prototypes = WebGL2RenderingContext.prototype;
       this.webGLContext = true;
     } else
       throw new Error(`Invalid context name: ${contextName}`);
@@ -109,7 +112,7 @@ export class ContextManager {
     if (object.hasOwnProperty("webGLType") && object.hasOwnProperty("id")) {
       return (this.webGLObject[object["id"]]);
     } else if (Array.isArray(object) && !method.endsWith("v")) {
-      return Int8Array.of(...(object as number[]));
+      return Int8Array.from(object);
     } else if (typeof(object) === "string" && (method === "bufferData" || method === "bufferSubData")) {
       let binStr = window.atob(object);
       let length = binStr.length;

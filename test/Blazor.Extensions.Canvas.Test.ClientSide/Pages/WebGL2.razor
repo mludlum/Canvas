@@ -1,0 +1,131 @@
+@page "/webgl2"
+@using Blazor.Extensions.Canvas.WebGL
+@implements IAsyncDisposable
+
+<h1>Canvas demo!!!</h1>
+
+<a href="/">View Canvas2d page</a><br>
+
+Welcome to your new app.
+
+<BECanvas Width="800" Height="600" @ref="canvasReference" ></BECanvas>
+
+@code {
+    private BECanvasComponent canvasReference;
+    private WebGL2Context context;
+    private WebGLProgram program;
+    private WebGLBuffer vertexBuffer;
+    private WebGLBuffer elementBuffer;
+    private WebGLBuffer instanceBuffer;
+    private WebGLVertexArrayObject vertexArray;
+
+    private Task BuildAsync(WebGLProgram program, string vs, string fs)
+    {
+        async Task compile(ShaderType type, string source, Func<Task> action)
+        {
+            var shader = await context.CreateShaderAsync(type);
+            try
+            {
+                await context.ShaderSourceAsync(shader, source);
+                await context.CompileShaderAsync(shader);
+                var error = await context.GetShaderInfoLogAsync(shader);
+                if (error != string.Empty) throw new Exception(error);
+                await context.AttachShaderAsync(program, shader);
+                try
+                {
+                    await action();
+                }
+                finally
+                {
+                    await context.DetachShaderAsync(program, shader);
+                }
+            }
+            finally
+            {
+                await context.DeleteShaderAsync(shader);
+            }
+        }
+        return compile(ShaderType.VERTEX_SHADER, vs, () => compile(ShaderType.FRAGMENT_SHADER, fs, async () =>
+        {
+            await context.LinkProgramAsync(program);
+            var error = await context.GetProgramInfoLogAsync(program);
+            if (error != string.Empty) throw new Exception(error);
+        }));
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (context == null) return;
+        await context.DeleteProgramAsync(program);
+        await context.DeleteBufferAsync(vertexBuffer);
+        await context.DeleteBufferAsync(elementBuffer);
+        await context.DeleteBufferAsync(instanceBuffer);
+        await context.DeleteVertexArrayAsync(vertexArray);
+        context.Dispose();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            context = await canvasReference.CreateWebGL2Async();
+            program = await context.CreateProgramAsync();
+            vertexBuffer = await context.CreateBufferAsync();
+            elementBuffer = await context.CreateBufferAsync();
+            instanceBuffer = await context.CreateBufferAsync();
+            vertexArray = await context.CreateVertexArrayAsync();
+            await BuildAsync(program,
+                @"#version 300 es
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 aColor;
+layout(location = 2) in vec3 aOffset;
+out vec3 vColor;
+
+void main() {
+    gl_Position = vec4(aPos + aOffset, 1.0);
+    vColor = aColor;
+}",
+                @"#version 300 es
+precision mediump float;
+in vec3 vColor;
+out vec4 fColor;
+
+void main() {
+    fColor = vec4(vColor, 1.0);
+}"
+            );
+            await context.BindVertexArrayAsync(vertexArray);
+            await context.BindBufferAsync(BufferType.ARRAY_BUFFER, vertexBuffer);
+            await context.BufferDataAsync(BufferType.ARRAY_BUFFER, new[]
+            {
+                -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+                0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+            }, BufferUsageHint.STATIC_DRAW);
+            await context.VertexAttribPointerAsync(0, 3, DataType.FLOAT, false, 6 * sizeof(float), 0);
+            await context.EnableVertexAttribArrayAsync(0);
+            await context.VertexAttribPointerAsync(1, 3, DataType.FLOAT, false, 6 * sizeof(float), 3 * sizeof(float));
+            await context.EnableVertexAttribArrayAsync(1);
+            await context.BindBufferAsync(BufferType.ELEMENT_ARRAY_BUFFER, elementBuffer);
+            await context.BufferDataAsync(BufferType.ELEMENT_ARRAY_BUFFER, new byte[]
+            {
+                0, 1, 2
+            }, BufferUsageHint.STATIC_DRAW);
+            await context.BindBufferAsync(BufferType.ARRAY_BUFFER, instanceBuffer);
+            await context.BufferDataAsync(BufferType.ARRAY_BUFFER, new[]
+            {
+                -0.5f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f
+            }, BufferUsageHint.STATIC_DRAW);
+            await context.VertexAttribPointerAsync(2, 3, DataType.FLOAT, false, 3 * sizeof(float), 0);
+            await context.VertexAttribDivisorAsync(2, 1);
+            await context.EnableVertexAttribArrayAsync(2);
+            await context.BindVertexArrayAsync(default);
+        }
+        await context.ClearColorAsync(0, 0, 0, 1);
+        await context.ClearAsync(BufferBits.COLOR_BUFFER_BIT);
+        await context.UseProgramAsync(program);
+        await context.BindVertexArrayAsync(vertexArray);
+        await context.DrawElementsInstancedAsync(Primitive.TRIANGLES, 3, DataType.UNSIGNED_BYTE, 0, 2);
+        await context.UseProgramAsync(default);
+        await context.BindVertexArrayAsync(default);
+    }
+}
