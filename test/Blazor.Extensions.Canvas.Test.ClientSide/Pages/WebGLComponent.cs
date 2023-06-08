@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Blazor.Extensions.Canvas.WebGL;
 using Microsoft.AspNetCore.Components;
@@ -63,7 +64,9 @@ namespace Blazor.Extensions.Canvas.Test.ClientSide.Pages
         private async Task<WebGLProgram> InitProgramAsync(WebGLContext gl, string vsSource, string fsSource)
         {
             var vertexShader = await this.LoadShaderAsync(gl, ShaderType.VERTEX_SHADER, vsSource);
+            Debug.WriteLine(vertexShader.Id);
             var fragmentShader = await this.LoadShaderAsync(gl, ShaderType.FRAGMENT_SHADER, fsSource);
+            Debug.WriteLine(fragmentShader.Id);
 
             var program = await gl.CreateProgramAsync();
             await gl.AttachShaderAsync(program, vertexShader);
@@ -85,6 +88,9 @@ namespace Blazor.Extensions.Canvas.Test.ClientSide.Pages
         private async Task<WebGLShader> LoadShaderAsync(WebGLContext gl, ShaderType type, string source)
         {
             var shader = await gl.CreateShaderAsync(type);
+
+            Console.WriteLine(shader.Id);
+            Debug.WriteLine(shader.Id);
 
             await gl.ShaderSourceAsync(shader, source);
             await gl.CompileShaderAsync(shader);
