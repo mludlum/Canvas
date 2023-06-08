@@ -56,7 +56,7 @@ namespace Blazor.Extensions.Canvas.WebGL
 
     public class WebGLUniformLocation : WebGLObject
     { }
-
     public class WebGLVertexArrayObject : WebGLObject
     { }
+
 }

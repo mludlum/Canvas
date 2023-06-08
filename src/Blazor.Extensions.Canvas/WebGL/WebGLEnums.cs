@@ -319,7 +319,6 @@ namespace Blazor.Extensions.Canvas.WebGL
         CLAMP_TO_EDGE = 0x812F,
         MIRRORED_REPEAT = 0x8370
     }
-
     public enum BlitFilter
     {
         NEAREST = 0x2600,

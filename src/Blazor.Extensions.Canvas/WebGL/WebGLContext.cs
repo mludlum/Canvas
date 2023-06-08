@@ -573,6 +573,10 @@ namespace Blazor.Extensions.Canvas.WebGL
                     throw new ArgumentOutOfRangeException(nameof(value), value.Length, "Value array is empty or too long");
             }
         }
+        public async Task Uniform1Async(WebGLUniformLocation location, params float[] value)
+        {
+            await this.BatchCallAsync(UNIFORM + "1fv", isMethodCall: true, location, value);
+        }
         public async Task UniformAsync(WebGLUniformLocation location, params float[] value)
         {
             switch (value.Length)

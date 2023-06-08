@@ -61,11 +61,13 @@ namespace Blazor.Extensions.Canvas.Canvas2D
             "repeat", "repeat-x", "repeat-y", "no-repeat"
         };
 
+        private const string GET_IMAGE_DATA_METHOD = "getImageData";
+        private const string PUT_IMAGE_DATA_METHOD = "putImageData";
         #endregion
 
         #region Properties
 
-        public object FillStyle { get; private set; } = "#000";
+        public string FillStyle { get; private set; } = "#000";
 
         public string StrokeStyle { get; private set; } = "#000";
 
@@ -96,7 +98,6 @@ namespace Blazor.Extensions.Canvas.Canvas2D
         public float ShadowOffsetY { get; private set; }
 
         public float GlobalAlpha { get; private set; } = 1.0f;
-
         public string GlobalCompositeOperation { get; private set; } = "source-over";
 
         #endregion Properties
@@ -107,10 +108,10 @@ namespace Blazor.Extensions.Canvas.Canvas2D
 
         #region Property Setters
 
-        public async Task SetFillStyleAsync(object value)
+        public async Task SetFillStyleAsync(string value)
         {
             this.FillStyle = value;
-            await this.BatchCallAsync(FILL_STYLE_PROPERTY, false, value);
+            await this.BatchCallAsync(FILL_STYLE_PROPERTY, isMethodCall: false, value);
         }
 
         public async Task SetStrokeStyleAsync(string value)
@@ -202,7 +203,6 @@ namespace Blazor.Extensions.Canvas.Canvas2D
             this.GlobalAlpha = value;
             await this.BatchCallAsync(GLOBAL_ALPHA_PROPERTY, isMethodCall: false, value);
         }
-
         public async Task SetGlobalCompositeOperationAsync(string value)
         {
             this.GlobalCompositeOperation = value;
@@ -212,7 +212,6 @@ namespace Blazor.Extensions.Canvas.Canvas2D
         #endregion Property Setters
 
         #region Methods
-
         [Obsolete("Use the async version instead, which is already called internally.")]
         public void FillRect(double x, double y, double width, double height) => this.CallMethod<object>(FILL_RECT_METHOD, x, y, width, height);
         public async Task FillRectAsync(double x, double y, double width, double height) => await this.BatchCallAsync(FILL_RECT_METHOD, isMethodCall: true, x, y, width, height);
@@ -337,10 +336,17 @@ namespace Blazor.Extensions.Canvas.Canvas2D
         public void Restore() => this.CallMethod<object>(RESTORE_METHOD);
         public async Task RestoreAsync() => await this.BatchCallAsync(RESTORE_METHOD, isMethodCall: true);
 
+        [Obsolete("Use the async version instead, which is already called internally.")]
+        public ImageData GetImageData(double sx, double sy, double sh, double sw) => this.CallMethod<ImageData>(GET_IMAGE_DATA_METHOD, sx, sy, sh, sw);
+        public async Task<ImageData> GetImageDataAsync(double sx, double sy, double sh, double sw) => await this.CallMethodAsync<ImageData>(GET_IMAGE_DATA_METHOD, sx, sy, sh, sw);
+
+        [Obsolete("Use the async version instead, which is already called internally.")]
+        public void PutImageData(ImageData imageData, double dx, double dy) => this.CallMethod<object>(PUT_IMAGE_DATA_METHOD, imageData, dx, dy);
+        public async Task PutImageDataAsync(ImageData imageData, double dx, double dy) => await this.CallMethodAsync<object>(PUT_IMAGE_DATA_METHOD, imageData, dx, dy);
+
         public async Task DrawImageAsync(ElementReference elementReference, double dx, double dy) => await this.BatchCallAsync(DRAW_IMAGE_METHOD, isMethodCall: true, elementReference, dx, dy);
         public async Task DrawImageAsync(ElementReference elementReference, double dx, double dy, double dWidth, double dHeight) => await this.BatchCallAsync(DRAW_IMAGE_METHOD, isMethodCall: true, elementReference, dx, dy, dWidth, dHeight);
         public async Task DrawImageAsync(ElementReference elementReference, double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) => await this.BatchCallAsync(DRAW_IMAGE_METHOD, isMethodCall: true, elementReference, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-
         public async Task<object> CreatePatternAsync(ElementReference image, RepeatPattern repeat) => await this.CallMethodAsync<object>(CREATE_PATTERN_METHOD, image, this._repeatNames[(int)repeat]);
 
         #endregion Methods
